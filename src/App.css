@@ -1,0 +1,90 @@
+#root {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  color: var(--figma-color-text);
+  background-color: var(--figma-color-bg);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em var(--figma-color-bg-brand));
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em var(--figma-color-bg-brand-hover));
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.title {
+  color: var(--figma-color-text);
+  font-size: 2.5em;
+  margin: 0;
+}
+
+.card {
+  padding: 2em;
+  border-radius: 8px;
+  background-color: var(--figma-color-bg-secondary);
+}
+
+.button {
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--figma-color-bg-brand);
+  color: var(--figma-color-text-onbrand);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.25s;
+}
+
+.button:hover {
+  background-color: var(--figma-color-bg-brand-hover);
+}
+
+.description {
+  color: var(--figma-color-text);
+  margin: 1em 0;
+}
+
+.footer {
+  color: var(--figma-color-text-secondary);
+  font-size: 0.9em;
+}
