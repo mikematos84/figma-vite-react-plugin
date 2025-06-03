@@ -1,5 +1,5 @@
 {
-  "name": "figma-plugin-react",
+  "name": "figma-vite-react-plugin",
   "private": true,
   "version": "0.0.0",
   "type": "module",

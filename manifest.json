@@ -1,15 +1,12 @@
 {
-  "name": "figma-plugin-react",
+  "name": "figma-vite-react-plugin",
   "id": "1234567890",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
   "editorType": ["figma"],
   "networkAccess": {
-    "allowedDomains": [
-      "https://api.github.com",
-      "https://api.airtable.com"
-    ],
+    "allowedDomains": ["https://api.github.com", "https://api.airtable.com"],
     "reasoning": "Access GitHub API for repository data and Airtable API for data storage"
   }
-} 
+}

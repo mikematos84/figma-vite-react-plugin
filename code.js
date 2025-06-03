@@ -1,9 +1,9 @@
-figma.showUI(__html__, { 
+figma.showUI(__html__, {
   width: 800,
   height: 600,
   themeColors: true,
-  title: "Figma Plugin React + Vite",
-  visible: true
+  title: 'Figma Vite React Plugin',
+  visible: true,
 });
 
 figma.ui.onmessage = async (msg) => {
@@ -19,4 +19,4 @@ figma.ui.onmessage = async (msg) => {
     figma.currentPage.selection = nodes;
     figma.viewport.scrollAndZoomIntoView(nodes);
   }
-}; 
+};
