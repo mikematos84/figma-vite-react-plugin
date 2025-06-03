@@ -62,6 +62,11 @@
   background-color: var(--figma-color-bg-secondary);
 }
 
+.button-container {
+  display: flex;
+  gap: 1rem;
+}
+
 .button {
   padding: 0.6em 1.2em;
   font-size: 1em;

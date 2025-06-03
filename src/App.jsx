@@ -22,12 +22,14 @@ function App() {
       </div>
       <h1 className="title">Figma Plugin React + Vite</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)} className="button">
-          count is {count}
-        </button>
-        <button onClick={onCreate} className="button">
-          Create
-        </button>
+        <div className="button-container">
+          <button onClick={() => setCount((count) => count + 1)} className="button">
+            count is {count}
+          </button>
+          <button onClick={onCreate} className="button">
+            Create Rectangles
+          </button>
+        </div>
         <p className="description">
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
