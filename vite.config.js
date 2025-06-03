@@ -1,33 +1,25 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { viteSingleFile } from 'vite-plugin-singlefile'
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react(), viteSingleFile()],
+export default defineConfig(({ command }) => ({
+  plugins: [react(), command === 'build' && viteSingleFile()].filter(Boolean),
   base: '',
   build: {
-    target: 'esnext',
     outDir: 'dist',
-    assetsDir: 'assets',
-    assetsInlineLimit: 0,
-    chunkSizeWarningLimit: 100000000,
     cssCodeSplit: false,
+    assetsInlineLimit: 100000000,
     rollupOptions: {
       input: 'ui.html',
       output: {
         entryFileNames: '[name].js',
-        inlineDynamicImports: false,
-        assetFileNames: (assetInfo) => {
-          const fileName = assetInfo.name.split('/').pop()
-          return `assets/${fileName}`
-        },
-        chunkFileNames: 'chunks/[name].[hash].js'
-      }
-    }
+        manualChunks: undefined,
+      },
+    },
   },
   server: {
     port: 5173,
-    open: true
-  }
-})
+    open: 'ui.html',
+  },
+}));
