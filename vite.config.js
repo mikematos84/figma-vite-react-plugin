@@ -8,6 +8,7 @@ export default defineConfig(({ command }) => ({
   base: '',
   build: {
     outDir: 'dist',
+    emptyOutDir: false,
     cssCodeSplit: false,
     assetsInlineLimit: 100000000,
     rollupOptions: {

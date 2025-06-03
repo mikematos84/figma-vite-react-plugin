@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name].[ext]',
+        preserveModules: false,
       },
     },
   },
