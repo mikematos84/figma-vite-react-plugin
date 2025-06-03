@@ -1,16 +1,15 @@
 import React from 'react';
 import { Navigate, Route, MemoryRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
-import Account from './components/Account';
-import Advanced from './components/Advanced';
 import Navigation from './components/Navigation';
-import Themes from './components/Themes';
+import Account from './views/Account';
+import Advanced from './views/Advanced';
+import Themes from './views/Themes';
 
 function App() {
   return (
     <Router initialEntries={['/themes']} initialIndex={0}>
       <div className="app-container">
-        Test
         <Navigation />
         <div className="content">
           <Routes>
