@@ -2,9 +2,9 @@ import React from 'react';
 import { Navigate, Route, MemoryRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
 import Navigation from './components/Navigation';
-import Account from './views/Account';
-import Advanced from './views/Advanced';
-import Themes from './views/Themes';
+import Account from './routes/Account';
+import Advanced from './routes/Advanced';
+import Themes from './routes/Themes';
 
 function App() {
   return (
