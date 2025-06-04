@@ -40,4 +40,19 @@
 .save-button-container {
   display: flex;
   justify-content: center;
+}
+
+/* Save button states */
+.button--saving {
+  background-color: #666666 !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.button--success {
+  background-color: #34d399 !important;
+}
+
+.button--error {
+  background-color: #ef4444 !important;
 } 

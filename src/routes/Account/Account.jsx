@@ -1,17 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Account.css';
 
 function Account() {
   const [githubConfig, setGithubConfig] = useState({
-    repo: import.meta.env.VITE_GITHUB_REPO || '',
-    directory: import.meta.env.VITE_GITHUB_DIRECTORY || '',
-    token: import.meta.env.VITE_GITHUB_TOKEN || ''
+    repo: '',
+    directory: '',
+    token: ''
   });
 
   const [airtableConfig, setAirtableConfig] = useState({
-    appId: import.meta.env.VITE_AIRTABLE_APP_ID || '',
-    token: import.meta.env.VITE_AIRTABLE_TOKEN || ''
+    appId: '',
+    token: ''
   });
+
+  const [saveStatus, setSaveStatus] = useState('');
+
+  useEffect(() => {
+    // Listen for messages from the plugin
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      switch (msg.type) {
+        case 'load-config':
+          setGithubConfig(msg.githubConfig);
+          setAirtableConfig(msg.airtableConfig);
+          break;
+        case 'save-success':
+          setSaveStatus('success');
+          setTimeout(() => setSaveStatus(''), 3000);
+          break;
+        case 'save-error':
+          setSaveStatus('error');
+          setTimeout(() => setSaveStatus(''), 3000);
+          break;
+      }
+    };
+
+    // Request initial configuration
+    parent.postMessage({ pluginMessage: { type: 'load-config' } }, '*');
+
+    // Cleanup
+    return () => {
+      window.onmessage = null;
+    };
+  }, []);
 
   const handleGithubChange = (e) => {
     const { name, value } = e.target;
@@ -30,9 +63,7 @@ function Account() {
   };
 
   const handleSave = async () => {
-    // TODO: Implement actual storage logic
-    console.log('Saving configurations:', { githubConfig, airtableConfig });
-    // Placeholder for clientStorage implementation
+    setSaveStatus('saving');
     parent.postMessage({ 
       pluginMessage: { 
         type: 'save-config',
@@ -40,6 +71,23 @@ function Account() {
         airtableConfig
       }
     }, '*');
+  };
+
+  const getSaveButtonText = () => {
+    switch (saveStatus) {
+      case 'saving':
+        return 'Saving...';
+      case 'success':
+        return 'Saved!';
+      case 'error':
+        return 'Error Saving';
+      default:
+        return 'Save Configuration';
+    }
+  };
+
+  const getSaveButtonClass = () => {
+    return `button ${saveStatus ? `button--${saveStatus}` : ''}`;
   };
 
   return (
@@ -59,7 +107,7 @@ function Account() {
               value={githubConfig.repo}
               onChange={handleGithubChange}
               className="input field-input"
-              placeholder="[@owner/]repository"
+              placeholder="username/repository"
             />
           </div>
           <div className="form-field">
@@ -75,7 +123,7 @@ function Account() {
             />
           </div>
           <div className="form-field">
-            <label htmlFor="githubToken" className="label field-label">Token</label>
+            <label htmlFor="githubToken" className="label field-label">GitHub Token</label>
             <input
               type="text"
               id="githubToken"
@@ -121,8 +169,12 @@ function Account() {
       </div>
 
       <div className="save-button-container">
-        <button onClick={handleSave} className="button">
-          Save Configuration
+        <button 
+          onClick={handleSave} 
+          className={getSaveButtonClass()}
+          disabled={saveStatus === 'saving'}
+        >
+          {getSaveButtonText()}
         </button>
       </div>
     </div>
