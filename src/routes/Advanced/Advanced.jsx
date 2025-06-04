@@ -1,9 +1,10 @@
 import React from 'react';
+import './Advanced.css';
 
 function Advanced() {
   return (
     <div className="advanced-container">
-      <h2>Advanced Settings</h2>
+      <h2 className="title">Advanced Settings</h2>
       <div className="advanced-content">
         <p>Configure advanced plugin settings here</p>
       </div>
@@ -11,4 +12,4 @@ function Advanced() {
   );
 }
 
-export default Advanced;
+export default Advanced; 

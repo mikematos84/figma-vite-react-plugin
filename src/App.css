@@ -1,31 +1,32 @@
 #root {
-  max-width: 800px;
+  max-width: 600px;
+  height: 600px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
   color: #333333;
   background-color: #ffffff;
+  overflow: hidden;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: #ffffff;
   color: #333333;
 }
 
 .content {
   flex: 1;
-  padding: 2rem;
   overflow-y: auto;
+  padding: 1rem;
 }
 
 /* Theme specific containers */
 .themes-container,
 .advanced-container,
 .account-container {
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
 }
 

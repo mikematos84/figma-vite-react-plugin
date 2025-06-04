@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Themes.css';
 
 function Themes() {
   const [count, setCount] = useState(0);
@@ -9,8 +10,8 @@ function Themes() {
 
   return (
     <div className="themes-container">
-      <h2>Themes</h2>
-      <div className="card">
+      <h2 className="title">Themes</h2>
+      <div className="themes-card">
         <div className="button-container">
           <button onClick={() => setCount((count) => count + 1)} className="button">
             count is {count}
@@ -19,10 +20,10 @@ function Themes() {
             Create Rectangles
           </button>
         </div>
-        <p className="description">Create rectangles with the current count</p>
+        <p className="themes-description">Create rectangles with the current count</p>
       </div>
     </div>
   );
 }
 
-export default Themes;
+export default Themes; 
