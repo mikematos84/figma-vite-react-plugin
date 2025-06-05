@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Themes.css';
 import { storage } from '../../lib/storage';
 import { GithubClient } from '../../lib/github';
+import { isDevelopment } from '../../lib/utils/environment';
 
 function Themes() {
   const [configs, setConfigs] = useState({
@@ -11,23 +12,39 @@ function Themes() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Load configurations from storage when component mounts
     async function loadConfigs() {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        const [githubConfig, airtableConfig] = await Promise.all([
-          storage.get('githubConfig'),
-          storage.get('airtableConfig'),
-        ]);
+        // Load configs sequentially to avoid message handling issues
+        if (isDevelopment()) {
+          console.log('Loading GitHub config...');
+        }
+        const githubConfig = await storage.get('githubConfig');
+
+        if (isDevelopment()) {
+          console.log('Loading Airtable config...');
+        }
+        const airtableConfig = await storage.get('airtableConfig');
+
+        if (isDevelopment()) {
+          console.log('Configs loaded:', { githubConfig, airtableConfig });
+        }
 
         setConfigs({
-          github: githubConfig,
-          airtable: airtableConfig,
+          github: githubConfig || null,
+          airtable: airtableConfig || null,
         });
       } catch (error) {
         console.error('Error loading configurations:', error);
-        setError('Failed to load configurations');
+        setError('Failed to load configurations: ' + (error.message || 'Unknown error'));
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -62,12 +79,25 @@ function Themes() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="themes-container">
+        <h2 className="title">Themes</h2>
+        <div className="themes-card">
+          <p>Loading configurations...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="themes-container">
       <h2 className="title">Themes</h2>
 
       <div className="themes-card">
         <h3>Stored Configurations</h3>
+
+        {error && <div style={{ color: 'red', margin: '1rem 0' }}>{error}</div>}
 
         <div style={{ textAlign: 'left', margin: '1rem 0' }}>
           <h4>GitHub Configuration:</h4>

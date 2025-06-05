@@ -63,18 +63,16 @@ function Account() {
     setError(null);
 
     try {
-      // Save both configs to storage
-      await Promise.all([
-        storage.set('githubConfig', githubConfig),
-        storage.set('airtableConfig', airtableConfig),
-      ]);
+      // Save configs one at a time to avoid race conditions
+      await storage.set('githubConfig', githubConfig);
+      await storage.set('airtableConfig', airtableConfig);
 
       setSaveStatus('success');
       setTimeout(() => setSaveStatus(''), 3000);
     } catch (error) {
       console.error('Error saving configuration:', error);
       setSaveStatus('error');
-      setError('Failed to save configuration');
+      setError(error.message || 'Failed to save configuration');
       setTimeout(() => setSaveStatus(''), 3000);
     }
   };

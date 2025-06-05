@@ -1,6 +1,6 @@
 import { BrowserStorage } from './BrowserStorage';
 import { PluginStorage } from './PluginStorage';
-import { isFigmaPlugin } from '../utils/environment';
+import { isFigmaPlugin, isDevelopment } from '../utils/environment';
 
 /**
  * Get the appropriate storage implementation based on the environment
@@ -8,7 +8,23 @@ import { isFigmaPlugin } from '../utils/environment';
  * @returns {BrowserStorage|PluginStorage} Storage implementation
  */
 export function createStorage(prefix = 'app:') {
-  return isFigmaPlugin() ? new PluginStorage(prefix) : new BrowserStorage(prefix);
+  const isPlugin = isFigmaPlugin();
+
+  if (isDevelopment()) {
+    console.log('Storage Environment:', {
+      isFigmaPlugin: isPlugin,
+      location: window.location.href,
+      isIframe: window.parent !== window,
+    });
+  }
+
+  const storage = isPlugin ? new PluginStorage(prefix) : new BrowserStorage(prefix);
+
+  if (isDevelopment()) {
+    console.log('Using storage implementation:', isPlugin ? 'PluginStorage' : 'BrowserStorage');
+  }
+
+  return storage;
 }
 
 /**

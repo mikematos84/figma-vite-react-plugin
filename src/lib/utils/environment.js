@@ -4,8 +4,19 @@
  */
 export const isFigmaPlugin = () => {
   try {
-    // Check for parent and pluginMessage support
-    return !!(window.parent && window.parent !== window && 'pluginMessage' in window);
+    // Check if we're in an iframe
+    if (window.parent === window) {
+      return false;
+    }
+
+    // Check if we're in Figma's iframe context
+    // We can check this by looking for specific Figma URL patterns
+    const inFigma =
+      window.location.href.includes('figma.com') ||
+      window.location.href.startsWith('data:') || // Figma uses data URLs in production
+      (import.meta.env.DEV && window.location.href.includes('localhost')); // Local development
+
+    return inFigma;
   } catch (e) {
     // If accessing window.parent throws a security error, we're in a cross-origin iframe
     // This is not a Figma plugin
