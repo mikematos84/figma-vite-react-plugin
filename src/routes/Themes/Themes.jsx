@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Themes.css';
 import { storage } from '../../lib/storage';
 import { GithubClient } from '../../lib/github';
+import { AirtableClient } from '../../lib/airtable';
 import { isDevelopment } from '../../lib/utils/environment';
 
 function Themes() {
@@ -10,8 +11,11 @@ function Themes() {
     airtable: null,
   });
   const [files, setFiles] = useState([]);
+  const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [tokensLoading, setTokensLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [tokensError, setTokensError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -79,6 +83,30 @@ function Themes() {
     }
   };
 
+  const loadDesignTokens = async () => {
+    setTokensLoading(true);
+    setTokensError(null);
+    setTokens([]);
+
+    try {
+      if (!configs.airtable?.token || !configs.airtable?.appId) {
+        throw new Error(
+          'Airtable token and App ID are required. Please configure them in Account settings.'
+        );
+      }
+
+      const client = new AirtableClient(configs.airtable.token, configs.airtable.appId);
+
+      const designTokens = await client.get();
+      setTokens(designTokens);
+    } catch (err) {
+      console.error('Error loading design tokens:', err);
+      setTokensError(err.message);
+    } finally {
+      setTokensLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="themes-container">
@@ -94,94 +122,126 @@ function Themes() {
     <div className="themes-container">
       <h2 className="title">Themes</h2>
 
-      <div className="themes-card">
-        <h3>Stored Configurations</h3>
+      {error && <div style={{ color: 'red', margin: '1rem 0' }}>{error}</div>}
 
-        {error && <div style={{ color: 'red', margin: '1rem 0' }}>{error}</div>}
-
-        <div style={{ textAlign: 'left', margin: '1rem 0' }}>
-          <h4>GitHub Configuration:</h4>
-          <pre
-            style={{
-              background: '#f5f5f5',
-              padding: '1rem',
-              borderRadius: '4px',
-              overflow: 'auto',
-            }}
-          >
-            {JSON.stringify(configs.github, null, 2)}
-          </pre>
-        </div>
-
-        <div style={{ textAlign: 'left', margin: '1rem 0' }}>
-          <h4>Airtable Configuration:</h4>
-          <pre
-            style={{
-              background: '#f5f5f5',
-              padding: '1rem',
-              borderRadius: '4px',
-              overflow: 'auto',
-            }}
-          >
-            {JSON.stringify(configs.airtable, null, 2)}
-          </pre>
-        </div>
-
-        <div style={{ marginTop: '2rem' }}>
-          <h3>Repository Files</h3>
+      <div style={{ marginTop: '2rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
           <button
             onClick={listRepositoryFiles}
             className="button"
             disabled={loading || !configs.github?.token || !configs.github?.repo}
-            style={{ marginBottom: '1rem' }}
           >
             {loading ? 'Loading...' : 'List Repository Files'}
           </button>
-
-          {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-
-          {files.length > 0 && (
-            <div style={{ textAlign: 'left' }}>
-              <ul
-                style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  background: '#f5f5f5',
-                  borderRadius: '4px',
-                  maxHeight: '300px',
-                  overflow: 'auto',
-                }}
-              >
-                {files.map((file) => (
-                  <li
-                    key={file.sha}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderBottom: '1px solid #e5e5e5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <span>{file.type === 'dir' ? '📁' : '📄'}</span>
-                    <span>{file.name}</span>
-                    {file.type === 'dir' && (
-                      <span
-                        style={{
-                          fontSize: '0.8em',
-                          color: '#666',
-                          marginLeft: 'auto',
-                        }}
-                      >
-                        Directory
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
+
+        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+        {tokensError && <div style={{ color: 'red', marginBottom: '1rem' }}>{tokensError}</div>}
+
+        {/* Repository Files Section */}
+        {files.length > 0 && (
+          <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
+            <h3>Repository Files</h3>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                background: '#f5f5f5',
+                borderRadius: '4px',
+                maxHeight: '300px',
+                overflow: 'auto',
+              }}
+            >
+              {files.map((file) => (
+                <li
+                  key={file.sha}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderBottom: '1px solid #e5e5e5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <span>{file.type === 'dir' ? '📁' : '📄'}</span>
+                  <span>{file.name}</span>
+                  {file.type === 'dir' && (
+                    <span
+                      style={{
+                        fontSize: '0.8em',
+                        color: '#666',
+                        marginLeft: 'auto',
+                      }}
+                    >
+                      Directory
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+          }}
+        >
+          <button
+            onClick={() => loadDesignTokens()}
+            className="button"
+            disabled={tokensLoading || !configs.airtable?.token || !configs.airtable?.appId}
+          >
+            {tokensLoading ? 'Loading...' : 'Load Design Tokens'}
+          </button>
+        </div>
+        {/* Design Tokens Section */}
+        {tokens.length > 0 && (
+          <div className="tokens-table-container">
+            <table className="design-tokens-table">
+              <thead>
+                <tr>
+                  {Object.keys(tokens[0]).map((key) => (
+                    <th key={key}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tokens.map((token, index) => {
+                  const {
+                    'Token Name': tokenName,
+                    'Token Type': tokenType,
+                    'Token Value': tokenValue,
+                    Description: description,
+                    'Brand Metadata': brandMetadata,
+                    'Approval Status': approvalStatus,
+                    'Design Token Image': designTokenImage,
+                  } = token;
+
+                  const {
+                    id,
+                    thumbnails: {
+                      small: { height, url, width },
+                    },
+                  } = designTokenImage[0];
+                  return (
+                    <tr key={index}>
+                      <td>{tokenName}</td>
+                      <td>{tokenType}</td>
+                      <td>{tokenValue}</td>
+                      <td>{description}</td>
+                      <td>{brandMetadata}</td>
+                      <td>{approvalStatus}</td>
+                      <td>
+                        <img src={url} alt={id} style={{ width: width, height: height }} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
