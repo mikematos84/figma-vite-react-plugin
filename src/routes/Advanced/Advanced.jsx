@@ -12,4 +12,4 @@ function Advanced() {
   );
 }
 
-export default Advanced; 
+export default Advanced;

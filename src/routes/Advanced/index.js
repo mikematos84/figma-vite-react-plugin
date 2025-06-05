@@ -1,1 +1,1 @@
-export { default } from './Advanced'; 
+export { default } from './Advanced';

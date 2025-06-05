@@ -1,76 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import './Account.css';
+import { storage } from '../../lib/storage';
+import { GithubClient } from '../../lib/github';
+import { isFigmaPlugin } from '../../lib/utils/environment';
+
+const DEFAULT_GITHUB_CONFIG = {
+  repo: '',
+  directory: '',
+  token: '',
+};
+
+const DEFAULT_AIRTABLE_CONFIG = {
+  appId: '',
+  token: '',
+};
 
 function Account() {
-  const [githubConfig, setGithubConfig] = useState({
-    repo: '',
-    directory: '',
-    token: ''
-  });
-
-  const [airtableConfig, setAirtableConfig] = useState({
-    appId: '',
-    token: ''
-  });
-
+  const [githubConfig, setGithubConfig] = useState(DEFAULT_GITHUB_CONFIG);
+  const [airtableConfig, setAirtableConfig] = useState(DEFAULT_AIRTABLE_CONFIG);
   const [saveStatus, setSaveStatus] = useState('');
+  const [files, setFiles] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Listen for messages from the plugin
-    window.onmessage = (event) => {
-      const msg = event.data.pluginMessage;
-      if (!msg) return;
+    // Load configuration from storage when component mounts
+    async function loadConfig() {
+      try {
+        // Load GitHub config
+        const savedGithubConfig = await storage.get('githubConfig');
+        setGithubConfig(savedGithubConfig || DEFAULT_GITHUB_CONFIG);
 
-      switch (msg.type) {
-        case 'load-config':
-          setGithubConfig(msg.githubConfig);
-          setAirtableConfig(msg.airtableConfig);
-          break;
-        case 'save-success':
-          setSaveStatus('success');
-          setTimeout(() => setSaveStatus(''), 3000);
-          break;
-        case 'save-error':
-          setSaveStatus('error');
-          setTimeout(() => setSaveStatus(''), 3000);
-          break;
+        // Load Airtable config
+        const savedAirtableConfig = await storage.get('airtableConfig');
+        setAirtableConfig(savedAirtableConfig || DEFAULT_AIRTABLE_CONFIG);
+      } catch (error) {
+        console.error('Error loading configuration:', error);
+        setError('Failed to load configuration');
       }
-    };
+    }
 
-    // Request initial configuration
-    parent.postMessage({ pluginMessage: { type: 'load-config' } }, '*');
-
-    // Cleanup
-    return () => {
-      window.onmessage = null;
-    };
+    loadConfig();
   }, []);
 
   const handleGithubChange = (e) => {
     const { name, value } = e.target;
-    setGithubConfig(prev => ({
+    setGithubConfig((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleAirtableChange = (e) => {
     const { name, value } = e.target;
-    setAirtableConfig(prev => ({
+    setAirtableConfig((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSave = async () => {
     setSaveStatus('saving');
-    parent.postMessage({ 
-      pluginMessage: { 
-        type: 'save-config',
-        githubConfig,
-        airtableConfig
-      }
-    }, '*');
+    setError(null);
+
+    try {
+      // Save both configs to storage
+      await Promise.all([
+        storage.set('githubConfig', githubConfig),
+        storage.set('airtableConfig', airtableConfig),
+      ]);
+
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      setSaveStatus('error');
+      setError('Failed to save configuration');
+      setTimeout(() => setSaveStatus(''), 3000);
+    }
   };
 
   const getSaveButtonText = () => {
@@ -92,49 +98,63 @@ function Account() {
 
   return (
     <div className="account-container">
-      <h2 className="title account-title">Account Settings</h2>
-      
+      <h2 className="title account-title">
+        Account Settings {!isFigmaPlugin() && ' (Development Mode)'}
+      </h2>
+
       {/* GitHub Configuration Section */}
       <div className="account-section">
         <h3 className="account-section-title">GitHub Configuration</h3>
         <div className="form-fields">
           <div className="form-field">
-            <label htmlFor="repo" className="label field-label">Repository</label>
+            <label htmlFor="repo" className="label field-label">
+              Repository
+            </label>
             <input
               type="text"
               id="repo"
               name="repo"
-              value={githubConfig.repo}
+              value={githubConfig?.repo}
               onChange={handleGithubChange}
               className="input field-input"
               placeholder="username/repository"
             />
           </div>
           <div className="form-field">
-            <label htmlFor="directory" className="label field-label">Directory</label>
+            <label htmlFor="directory" className="label field-label">
+              Directory
+            </label>
             <input
               type="text"
               id="directory"
               name="directory"
-              value={githubConfig.directory}
+              value={githubConfig?.directory}
               onChange={handleGithubChange}
               className="input field-input"
               placeholder="path/to/directory"
             />
           </div>
           <div className="form-field">
-            <label htmlFor="githubToken" className="label field-label">GitHub Token</label>
+            <label htmlFor="githubToken" className="label field-label">
+              GitHub Token
+            </label>
             <input
               type="text"
               id="githubToken"
               name="token"
-              value={githubConfig.token}
+              value={githubConfig?.token}
               onChange={handleGithubChange}
               className="input field-input"
               placeholder="Enter your GitHub token"
             />
           </div>
         </div>
+
+        {error && (
+          <div className="error-message" style={{ marginTop: '1rem', color: 'red' }}>
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Airtable Configuration Section */}
@@ -142,24 +162,28 @@ function Account() {
         <h3 className="account-section-title">Airtable Configuration</h3>
         <div className="form-fields">
           <div className="form-field">
-            <label htmlFor="appId" className="label field-label">App ID</label>
+            <label htmlFor="appId" className="label field-label">
+              App ID
+            </label>
             <input
               type="text"
               id="appId"
               name="appId"
-              value={airtableConfig.appId}
+              value={airtableConfig?.appId}
               onChange={handleAirtableChange}
               className="input field-input"
               placeholder="Enter your Airtable App ID"
             />
           </div>
           <div className="form-field">
-            <label htmlFor="airtableToken" className="label field-label">Token</label>
+            <label htmlFor="airtableToken" className="label field-label">
+              Token
+            </label>
             <input
               type="text"
               id="airtableToken"
               name="token"
-              value={airtableConfig.token}
+              value={airtableConfig?.token}
               onChange={handleAirtableChange}
               className="input field-input"
               placeholder="Enter your Airtable token"
@@ -169,8 +193,8 @@ function Account() {
       </div>
 
       <div className="save-button-container">
-        <button 
-          onClick={handleSave} 
+        <button
+          onClick={handleSave}
           className={getSaveButtonClass()}
           disabled={saveStatus === 'saving'}
         >
@@ -181,4 +205,4 @@ function Account() {
   );
 }
 
-export default Account; 
+export default Account;
